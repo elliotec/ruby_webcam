@@ -1,17 +1,19 @@
 require 'av_capture'
+require 'io/console'
 
-# Create a recording session
 session = AVCapture::Session.new
-
-# Find the first video capable device
 dev = AVCapture.devices.find(&:video?)
 
-# Output the camera's name
 $stderr.puts dev.name
 
-# Connect the camera to the recording session
 session.run_with(dev) do |connection|
-
-  # Capture an image and write it to $stdout
-  $stdout.write connection.Capture
+  loop do
+    case $stdin.getch
+    when 'q' then break
+    else
+      IO.popen("open -g -f -a /Applications/Preview.app", 'w') do |f|
+        f.write connection.capture
+      end
+    end
+  end
 end
